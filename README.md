@@ -18,17 +18,17 @@
     * 在庫数
     * 画像
     * 公開ステータス
-    * _追加日_
+    * __追加日__
 
 
 ###2.DBの商品を変更する機能(UPDATE)
 
 
-＊ 変更するレコード
+* 変更するレコード
 
     * 在庫数
     * 公開ステータス
-    * _変更日_
+    * __変更日__
 
 ###3.DBの商品を、一覧表示する機能(SELECT)
 
@@ -71,12 +71,12 @@
 
 * INSERT クエリ  => pro_info_table
 
-    INSERT INTO pro_info_table (pro_name,pro_price,pro_create_date,pro_update_date,pro_status) VALUES('TEA','130',now(),now(),0)
+    `INSERT INTO pro_info_table (pro_name,pro_price,pro_create_date,pro_update_date,pro_status) VALUES('TEA','130',now(),now(),0)`
 
 
 * UPDATE クエリ  => pro_info_table
 
-    UPDATE pro_info_table SET pro_image='c076f265d5f4899f22f04d5a5120a5b6.jpg' WHERE pro_id=1;
+    `UPDATE pro_info_table SET pro_image='c076f265d5f4899f22f04d5a5120a5b6.jpg' WHERE pro_id=1;`
 
 
 ##▼コメント
@@ -103,7 +103,7 @@
 
     * 商品の追加あるいは指定ドリンク情報（「在庫数」、「公開ステータス」）の変更が正常に完了した場合、完了のメッセージを表示する。
 
-    ###▼バリデーション条件  
+###▼バリデーション条件  
 
 
     * 商品を追加する場合、「商品名」「値段」、「在庫数」、「公開ステータス」「商品画像」のいずれかを指定していない場合、エラーメッセージを表示して、商品を追加できない。
