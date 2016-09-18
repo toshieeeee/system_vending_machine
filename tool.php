@@ -34,7 +34,7 @@ try{
 
 
       /***********************************
-      ▼商品名のバリデーション
+      ▼商品名のバリデーション [INSERT]
       ************************************/
 
       $pro_name = null;
@@ -58,7 +58,7 @@ try{
       }
 
       /***********************************
-      ▼価格のバリデーション
+      ▼価格のバリデーション [INSERT]
       ************************************/
 
       $pro_price = null;
@@ -88,7 +88,7 @@ try{
       }
 
       /***********************************
-      ▼在庫数のバリデーション
+      ▼在庫数のバリデーション [INSERT]
       ************************************/
 
       $pro_num = null;
@@ -119,7 +119,7 @@ try{
       }
 
       /***********************************
-      ▼画像のアップロード
+      ▼画像のアップロード [INSERT]
       ************************************/
 
       if (is_uploaded_file($_FILES['pro_image']['tmp_name']) === TRUE) {
@@ -162,7 +162,7 @@ try{
       }
 
       /***********************************
-      ▼表示ステータスのバリデーション
+      ▼表示ステータスのバリデーション [INSERT]
       ************************************/
 
       $pro_status = null;
@@ -183,82 +183,69 @@ try{
 
       ************************************/
 
-      /*
-        $sql = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_num,pro_create_date,pro_status) VALUES (?,?,?,?,?,?)';
-        $stmt = $dbh->prepare($sql); 
-        $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
-        $data[] = $_POST['pro_price'];
-        $data[] = $pro_image;
-        $data[] = $_POST['pro_num'];
-        $data[] = date('Y-m-d H:i:s');
-        $data[] = $_POST['pro_status'];
-      */
+      /************************************
+      トランザクションの開始 [INSERT]
+      *************************************/
+      
+      $dbh->beginTransaction(); 
 
-        /************************************
-        オートコミットをOFF = トランザクションの開始
-        *************************************/
-        
-        $dbh->beginTransaction(); 
+      $sql_info = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_create_date,pro_status) VALUES (?,?,?,?,?)';
+      $stmt = $dbh->prepare($sql_info); 
 
-        $sql_info = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_create_date,pro_status) VALUES (?,?,?,?,?)';
-        $stmt = $dbh->prepare($sql_info); 
+      $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
+      $data[] = $_POST['pro_price'];
+      $data[] = $pro_image;
+      $data[] = date('Y-m-d H:i:s');
+      $data[] = $_POST['pro_status'];
 
-        $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
-        $data[] = $_POST['pro_price'];
-        $data[] = $pro_image;
-        $data[] = date('Y-m-d H:i:s');
-        $data[] = $_POST['pro_status'];
+      //INSERT実行
 
-        //INSERT実行
+      if($stmt->execute($data)){
 
-        if($stmt->execute($data)){
+      } else {
 
-        } else {
+        $error['pro_info_table'] = 'SQL失敗:' .$sql_info;
 
-          $error['pro_info_table'] = 'SQL失敗:' .$sql_info;
+      }
 
-        }
+      $sql_num = 'INSERT INTO pro_num_table(pro_num,pro_create_date) VALUES (?,?)';
 
-        $sql_num = 'INSERT INTO pro_num_table(pro_num,pro_create_date) VALUES (?,?)';
+      $stmt = $dbh->prepare($sql_num); 
+      $num[] = $_POST['pro_num'];
+      $num[] = date('Y-m-d H:i:s');
 
-        $stmt = $dbh->prepare($sql_num); 
-        $num[] = $_POST['pro_num'];
-        $num[] = date('Y-m-d H:i:s');
+      if($stmt->execute($num)){
 
-        if($stmt->execute($num)){
+      } else {
 
-        } else {
+        $error['pro_num_table'] = 'SQL失敗:' .$sql_num;
 
-          $error['pro_num_table'] = 'SQL失敗:' .$sql_num;
+      };
 
-        };
+      /************************************
+      トランザクションの成否判定 [INSERT]
+      *************************************/
 
-        /************************************
-        トランザクションの成否判定
-        *************************************/
+      if(count($error) === 0) {
 
-        if(count($error) === 0) {
+        $dbh->commit(); // コミット
+        echo 'SQL成功';
 
-          $dbh->commit(); // コミット
-          echo 'SQL成功';
+      } else {
 
-        } else {
+      $dbh->rollback(); //ロールバック
 
-        $dbh->rollback(); //ロールバック
-
-        }
-
-        //header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクトします
-        
-    } //  [$_POST] - pro_add
-
-    if(isset($_POST['pro_update']) == TRUE){
+      }
+ 
+    } //  $_POST['pro_add']
 
     /***********************************
 
     ▼UPDATE機能 
 
     ************************************/
+
+    if(isset($_POST['pro_update']) == TRUE){
 
       $pro_num = null; 
 
@@ -289,7 +276,6 @@ try{
       }
 
 
-
       /***********************************
 
       ▼UPDATEを実行
@@ -298,41 +284,57 @@ try{
 
       if(count($error) === 0){
 
-        $sql = 'UPDATE pro_info_table SET pro_num = '.$pro_num.' WHERE pro_id = '.$pro_id;
-        $stmt = $dbh->prepare($sql);         
-        $stmt->execute($data);
+        $pro_update_date = date('Y-m-d H:i:s');
+        $sql = 'UPDATE pro_num_table SET pro_num = '.$pro_num.',pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
+        $stmt = $dbh->prepare($sql); 
 
-        echo "変更しました!";
+        if($stmt->execute($data)){ // UPDATE 実行
+
+          echo "変更しました!";
+
+        } else {
+
+            $error['pro_num_update'] = 'SQL失敗:' .$sql;            
+
+        }
+
+      
        // header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクトします
 
       }
     
-    } // pro_update
+    } // $_POST['pro_update'];
 
     /***********************************
-    ▼ ステータス変更機能
+
+    ▼ ステータス変更機能 [update]
+
     ************************************/
 
     $pro_status = null;
 
     if(isset($_POST['close']) == TRUE){
 
-        $pro_status = 0;
         $pro_id = $_POST['pro_id'];
-        $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' WHERE pro_id = '.$pro_id;
+        $pro_status = 0;
+        $pro_update_date = date('Y-m-d H:i:s');
+        
+        $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' , pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
+        var_dump($sql);
         $stmt = $dbh->prepare($sql);         
         $stmt->execute($data);
 
     } else if(isset($_POST['open']) == TRUE){
 
-        $pro_status = 1;
         $pro_id = $_POST['pro_id'];
-        $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' WHERE pro_id = '.$pro_id;
+        $pro_status = 1;
+        $pro_update_date = date('Y-m-d H:i:s');
+        //$sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' WHERE pro_id = '.$pro_id;
+        $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' , pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
         $stmt = $dbh->prepare($sql);         
         $stmt->execute($data);
 
     }
-
 
 
   } // [$_POST] 
@@ -344,7 +346,17 @@ try{
 
   ************************************/
 
-  $sql = 'SELECT pro_id,pro_image,pro_name,pro_price,pro_num,pro_status FROM pro_info_table';
+  //$sql = 'SELECT pro_id,pro_image,pro_name,pro_price,pro_num,pro_status FROM pro_info_table';
+
+
+  $sql = 'SELECT pro_info_table.pro_id,pro_info_table.pro_image,pro_info_table.pro_name,pro_info_table.pro_price,pro_num_table.pro_num,pro_info_table.pro_status
+  FROM
+  pro_num_table 
+  JOIN
+  pro_info_table
+  on
+  pro_info_table.pro_id = pro_num_table.pro_id';
+
   $stmt = $dbh->prepare($sql);
   $stmt->execute(); 
 
