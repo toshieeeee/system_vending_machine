@@ -2,10 +2,13 @@
 
 try{
 
+  date_default_timezone_set('Asia/Tokyo');
   $list = '';
   $img_dir = './image/';
   $error = array();
   $data = array();
+
+
 
   /***********************************
 
@@ -27,7 +30,7 @@ try{
 
   ************************************/
 
-    if(isset($_POST['pro_add']) == TRUE){
+    if(isset($_POST['pro_add']) === TRUE){
 
 
       /***********************************
@@ -125,21 +128,15 @@ try{
 
         $extension = pathinfo($pro_image, PATHINFO_EXTENSION); // 拡張子チェック
 
-        if ($extension === 'jpg' || $extension == 'jpeg' || $extension == 'png') {  
+        if ($extension === 'jpg' || $extension == 'jpeg' || $extension == 'JPG' || $extension == 'png') {  
 
           // ユニークID生成し保存ファイルの名前を変更 
           //<MEMO> 画像 : 名前を生成するかは、要件によるが、ランダムに生成するパターンが多い
           //DB : 外部キーは、設定する必要あり 
 
           $pro_image = md5(uniqid(mt_rand(), true)) . '.' . $extension; 
-
-         // var_dump($pro_image);     
         
-            // 同名ファイルが存在するか確認 
-
             if (is_file($img_dir . $pro_image) !== TRUE) { 
-
-              // ファイルを移動し保存
 
               if (move_uploaded_file($_FILES['pro_image']['tmp_name'], $img_dir . $pro_image) !== TRUE) {
 
@@ -186,8 +183,7 @@ try{
 
       ************************************/
 
-      if(count($error) === 0){
-
+      /*
         $sql = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_num,pro_create_date,pro_status) VALUES (?,?,?,?,?,?)';
         $stmt = $dbh->prepare($sql); 
         $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
@@ -196,16 +192,64 @@ try{
         $data[] = $_POST['pro_num'];
         $data[] = date('Y-m-d H:i:s');
         $data[] = $_POST['pro_status'];
+      */
+
+        /************************************
+        オートコミットをOFF = トランザクションの開始
+        *************************************/
         
+        $dbh->beginTransaction(); 
+
+        $sql_info = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_create_date,pro_status) VALUES (?,?,?,?,?)';
+        $stmt = $dbh->prepare($sql_info); 
+
+        $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
+        $data[] = $_POST['pro_price'];
+        $data[] = $pro_image;
+        $data[] = date('Y-m-d H:i:s');
+        $data[] = $_POST['pro_status'];
+
+        //INSERT実行
+
+        if($stmt->execute($data)){
+
+        } else {
+
+          $error['pro_info_table'] = 'SQL失敗:' .$sql_info;
+
+        }
+
+        $sql_num = 'INSERT INTO pro_num_table(pro_num,pro_create_date) VALUES (?,?)';
+
+        $stmt = $dbh->prepare($sql_num); 
+        $num[] = $_POST['pro_num'];
+        $num[] = date('Y-m-d H:i:s');
+
+        if($stmt->execute($num)){
+
+        } else {
+
+          $error['pro_num_table'] = 'SQL失敗:' .$sql_num;
+
+        };
+
+        /************************************
+        トランザクションの成否判定
+        *************************************/
+
+        if(count($error) === 0) {
+
+          $dbh->commit(); // コミット
+          echo 'SQL成功';
+
+        } else {
+
+        $dbh->rollback(); //ロールバック
+
+        }
+
+        //header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクトします
         
-       // $data[] = $_SERVER['REMOTE_ADDR'];
-        //$data[] = $_SERVER['REMOTE_HOST'];
-
-        $stmt->execute($data);
-        header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクトします
-
-      }
-
     } //  [$_POST] - pro_add
 
     if(isset($_POST['pro_update']) == TRUE){
@@ -296,7 +340,7 @@ try{
 
   /***********************************
 
-  SELECT - 一覧情報取得
+  SELECT - 一覧情報取得 - テーブルを結合してクエリを実行する。
 
   ************************************/
 
