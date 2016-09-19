@@ -128,7 +128,7 @@ try{
 
         $extension = pathinfo($pro_image, PATHINFO_EXTENSION); // 拡張子チェック
 
-        if ($extension === 'jpg' || $extension == 'jpeg' || $extension == 'JPG' || $extension == 'png') {  
+        if ($extension === 'jpg' || $extension === 'jpeg' || $extension === 'JPG' || $extension === 'png') {  
 
           // ユニークID生成し保存ファイルの名前を変更 
           //<MEMO> 画像 : 名前を生成するかは、要件によるが、ランダムに生成するパターンが多い
@@ -198,9 +198,7 @@ try{
       $data[] = date('Y-m-d H:i:s');
       $data[] = $_POST['pro_status'];
 
-      //INSERT実行
-
-      if($stmt->execute($data)){
+      if($stmt->execute($data)){ // SQLの判定 / 実行
 
       } else {
 
@@ -229,15 +227,17 @@ try{
       if(count($error) === 0) {
 
         $dbh->commit(); // コミット
-        echo 'SQL成功';
+        header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
 
       } else {
 
       $dbh->rollback(); //ロールバック
 
       }
- 
+
     } //  $_POST['pro_add']
+
+
 
     /***********************************
 
@@ -245,7 +245,15 @@ try{
 
     ************************************/
 
-    if(isset($_POST['pro_update']) == TRUE){
+    /***********************************
+    ▼「在庫数変更」機能 
+    ************************************/
+
+    /***********************************
+    ▼在庫数のバリデーション [UPDATE]
+    ************************************/
+
+    if(isset($_POST['pro_update']) === TRUE){
 
       $pro_num = null; 
 
@@ -270,16 +278,14 @@ try{
 
       } else {
 
-        $pro_num = $_POST['pro_num']; //一つづつ、UPDATEする際は、POSTする変数を共通にすれば良いのではないだろうか。
         $pro_id = $_POST['pro_id'];
-
+        $pro_num = $_POST['pro_num']; 
+        
       }
 
 
       /***********************************
-
-      ▼UPDATEを実行
-
+      ▼在庫数クエリ実行 [UPDATE]
       ************************************/
 
       if(count($error) === 0){
@@ -288,9 +294,11 @@ try{
         $sql = 'UPDATE pro_num_table SET pro_num = '.$pro_num.',pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
         $stmt = $dbh->prepare($sql); 
 
-        if($stmt->execute($data)){ // UPDATE 実行
+        if($stmt->execute($data)){ // クエリ判定/実行
 
-          echo "変更しました!";
+          //echo "「在庫数」変更しました!";
+          
+          header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
 
         } else {
 
@@ -298,46 +306,47 @@ try{
 
         }
 
-      
-       // header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクトします
-
       }
     
     } // $_POST['pro_update'];
 
     /***********************************
-
     ▼ ステータス変更機能 [update]
-
     ************************************/
 
     $pro_status = null;
 
-    if(isset($_POST['close']) == TRUE){
+    if(isset($_POST['close']) === TRUE || isset($_POST['open']) === TRUE){
 
-        $pro_id = $_POST['pro_id'];
-        $pro_status = 0;
-        $pro_update_date = date('Y-m-d H:i:s');
-        
-        $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' , pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
-        var_dump($sql);
-        $stmt = $dbh->prepare($sql);         
-        $stmt->execute($data);
+      $pro_id = $_POST['pro_id'];
+      $pro_update_date = date('Y-m-d H:i:s');
 
-    } else if(isset($_POST['open']) == TRUE){
+      if(isset($_POST['close']) === TRUE){
 
-        $pro_id = $_POST['pro_id'];
-        $pro_status = 1;
-        $pro_update_date = date('Y-m-d H:i:s');
-        //$sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' WHERE pro_id = '.$pro_id;
-        $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' , pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
-        $stmt = $dbh->prepare($sql);         
-        $stmt->execute($data);
+         $pro_status = 0;
+                
+      } else if(isset($_POST['open']) === TRUE){
 
-    }
+          $pro_status = 1;
+      }
 
+      $sql = 'UPDATE pro_info_table SET pro_status = '.$pro_status.' , pro_update_date = "'.$pro_update_date.'" WHERE pro_id = '.$pro_id;
+      $stmt = $dbh->prepare($sql);         
+      
+      if($stmt->execute($data)){
 
-  } // [$_POST] 
+        //echo "ステータス変更しました!";
+        header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
+
+      } else {
+
+        $error['pro_update'] = 'SQL失敗:' .$sql;            
+
+      }
+
+    } // [$POST[open] || [close]]
+
+  } /********** [$_POST] *************/
 
 
   /***********************************
@@ -346,16 +355,7 @@ try{
 
   ************************************/
 
-  //$sql = 'SELECT pro_id,pro_image,pro_name,pro_price,pro_num,pro_status FROM pro_info_table';
-
-
-  $sql = 'SELECT pro_info_table.pro_id,pro_info_table.pro_image,pro_info_table.pro_name,pro_info_table.pro_price,pro_num_table.pro_num,pro_info_table.pro_status
-  FROM
-  pro_num_table 
-  JOIN
-  pro_info_table
-  on
-  pro_info_table.pro_id = pro_num_table.pro_id';
+  $sql = 'SELECT pro_info_table.pro_id,pro_info_table.pro_image,pro_info_table.pro_name,pro_info_table.pro_price,pro_num_table.pro_num,pro_info_table.pro_status FROM pro_num_table JOIN pro_info_table on pro_info_table.pro_id = pro_num_table.pro_id';
 
   $stmt = $dbh->prepare($sql);
   $stmt->execute(); 
@@ -374,11 +374,10 @@ while(true){
 
   $rec = $stmt->fetch(PDO::FETCH_ASSOC); // Get Result As Associative Array
 
-  if($rec==false){
+  if($rec === false){
     break;
   }
 
-  //$list .= '<input type=hidden name="pro_id" value="'.$rec['pro_id'].'">';
 
   if($rec['pro_status'] === '1'){
 
