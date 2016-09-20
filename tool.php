@@ -73,13 +73,13 @@ try{
 
       } else if(preg_match('/^\s*$|^　*$/',$_POST['pro_price'])){ 
 
-      //[fix]数値のみバリデーションさせる
-
         $error['pro_price'] = '価格は半角、または全角スペースだけでは登録できません';
 
-      } else if (!preg_match('/[1-9]/',$_POST['pro_price'])){
+      } else if (!preg_match('/^[1-9]+$/',$_POST['pro_price'])){
 
-        $error['pro_price'] = '価格は半角数値のみ入力可能です';
+        $error['pro_price'] = '価格は正数値のみ入力可能です';
+
+        //整数のみバリデーションさせる。(is_numeric関数で判断 → 型を見たらどうしても、文字列に変換されてしまうみたいなので、だめ？)
 
       } else {
 
@@ -108,9 +108,9 @@ try{
         $error['pro_num'] = '在庫数は半角、または全角スペースだけでは登録できません';
 
 
-      } else if(!preg_match('/[1-9]/',$_POST['pro_num'])){
+      } else if(!preg_match('/^[1-9]+$/',$_POST['pro_num'])){
 
-        $error['pro_num'] = '在庫数は半角数値のみ入力可能です';
+        $error['pro_num'] = '在庫数は半角正数値のみ入力可能です';
 
       } else {
 
@@ -183,47 +183,49 @@ try{
 
       ************************************/
 
+
+      if(count($error) === 0) {
+
       /************************************
       トランザクションの開始 [INSERT]
       *************************************/
       
-      $dbh->beginTransaction(); 
+        $dbh->beginTransaction(); 
 
-      $sql_info = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_create_date,pro_status) VALUES (?,?,?,?,?)';
-      $stmt = $dbh->prepare($sql_info); 
+        $sql_info = 'INSERT INTO pro_info_table(pro_name,pro_price,pro_image,pro_create_date,pro_status) VALUES (?,?,?,?,?)';
+        $stmt = $dbh->prepare($sql_info); 
 
-      $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
-      $data[] = $_POST['pro_price'];
-      $data[] = $pro_image;
-      $data[] = date('Y-m-d H:i:s');
-      $data[] = $_POST['pro_status'];
+        $data[] = $_POST['pro_name']; //[shold] バリでで変数に入れてるので、、
+        $data[] = $_POST['pro_price'];
+        $data[] = $pro_image;
+        $data[] = date('Y-m-d H:i:s');
+        $data[] = $_POST['pro_status'];
 
-      if($stmt->execute($data)){ // SQLの判定 / 実行
+        if($stmt->execute($data)){ // SQLの判定 / 実行
 
-      } else {
+        } else {
 
-        $error['pro_info_table'] = 'SQL失敗:' .$sql_info;
+          $error['pro_info_table'] = 'SQL失敗:' .$sql_info;
 
-      }
+        }
+    
+        $sql_num = 'INSERT INTO pro_num_table(pro_num,pro_create_date) VALUES (?,?)';
 
-      $sql_num = 'INSERT INTO pro_num_table(pro_num,pro_create_date) VALUES (?,?)';
+        $stmt = $dbh->prepare($sql_num); 
+        $num[] = $_POST['pro_num'];
+        $num[] = date('Y-m-d H:i:s');
 
-      $stmt = $dbh->prepare($sql_num); 
-      $num[] = $_POST['pro_num'];
-      $num[] = date('Y-m-d H:i:s');
+        if($stmt->execute($num)){
 
-      if($stmt->execute($num)){
+        } else {
 
-      } else {
-
-        $error['pro_num_table'] = 'SQL失敗:' .$sql_num;
-
-      };
+          $error['pro_num_table'] = 'SQL失敗:' .$sql_num;
+        }
 
       /************************************
       トランザクションの成否判定 [INSERT]
       *************************************/
-
+      
       if(count($error) === 0) {
 
         $dbh->commit(); // コミット
@@ -232,6 +234,10 @@ try{
       } else {
 
       $dbh->rollback(); //ロールバック
+
+      }
+
+      
 
       }
 
@@ -272,9 +278,9 @@ try{
         $error['pro_num'] = '在庫数は半角、または全角スペースだけでは登録できません';
 
 
-      } else if(!preg_match('/[1-9]/',$_POST['pro_num'])){
+      } else if(!preg_match('/^[1-9]+$/',$_POST['pro_num'])){
 
-        $error['pro_num'] = '在庫数は半角数値のみ入力可能です';
+        $error['pro_num'] = '在庫数は半角正数値のみ入力可能です';
 
       } else {
 
