@@ -301,8 +301,6 @@ try{
         $stmt = $dbh->prepare($sql); 
 
         if($stmt->execute($data)){ // クエリ判定/実行
-
-          //echo "「在庫数」変更しました!";
           
           header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
 
@@ -384,6 +382,11 @@ while(true){
     break;
   }
 
+  //if($rec['pro_update_date'] == date('Y-m-d H:i:s')){
+   // echo "変更しました";
+ // }
+  
+
 
   if($rec['pro_status'] === '1'){
 
@@ -432,6 +435,7 @@ while(true){
 /******************************************************
 PHP Code END 
 *******************************************************/
+
 
 ?>
 
