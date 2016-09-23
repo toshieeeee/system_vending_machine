@@ -62,7 +62,16 @@ try{
       $list .= '<div class="pro_text_wrapper">';
       $list .= '<p class="pro_text pro_name">' .$rec['pro_name'].'</p>';
       $list .= '<p class="pro_text pro_price">' .$rec['pro_price'].'円</p>';
-      $list .= '<p class="pro_text pro_price"><input type="radio" name="pro_id" value="'.$rec['pro_id'].'"></p>';
+      $list .= '<input type ="hidden" name="pro_name" value="' .$rec['pro_name'].'">';
+
+      if($rec['pro_num']){
+
+        $list .= '<p class="pro_text pro_price"><input type="radio" name="pro_id" value="'.$rec['pro_id'].'"></p>';
+        
+      } else{ 
+        $list .= '<p class="pro_text pro_price pro_text_none">売り切れです</p>';
+      }
+
       $list .= '</div>';
 
 
@@ -142,11 +151,15 @@ PHP Code END
       float: left;
     }
 
-    .pro_text{
+    .pro_text {
       text-align: center;
       font-size: 12px;
       line-height: 1.5;
-      font-color: #0f2950;
+      color: #0f2950;
+    }
+
+    .pro_text_none {
+      color: red;
     }
     
     .image,img {  
@@ -233,7 +246,7 @@ PHP Code END
 
       </div>
 
-      <p class="parents_pro_price_submit">投入金額 <input type="text" name="pro_price" class="pro_price_submit"></p>
+      <p class="parents_pro_price_submit">投入金額 <input type="text" name="pro_price_submit" class="pro_price_submit"></p>
 
 
     </div>

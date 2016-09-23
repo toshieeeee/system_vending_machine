@@ -278,7 +278,7 @@ try{
         $error['pro_num'] = '在庫数は半角、または全角スペースだけでは登録できません';
 
 
-      } else if(!preg_match('/^[1-9]+$/',$_POST['pro_num'])){
+      } else if(!preg_match('/^[0-9]+$/',$_POST['pro_num'])){
 
         $error['pro_num'] = '在庫数は半角正数値のみ入力可能です';
 
