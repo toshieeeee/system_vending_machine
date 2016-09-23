@@ -51,21 +51,24 @@ try{
     if($rec === false){
       break;
     }
-    $list .= '<div class="contents_wrapper">';
 
-    $list .= '<form action="result.php" method="post">';
+    if($rec['pro_status']){
 
-    $list .= '<p class="image"><img src="'.$img_dir.$rec['pro_image'].'"</></p>';
+      $list .= '<div class="contents_wrapper">';
 
-    $list .= '<div class="pro_text_wrapper">';
-    $list .= '<p class="pro_text pro_name">' .$rec['pro_name'].'</p>';
-    $list .= '<p class="pro_text pro_price">' .$rec['pro_price'].'円</p>';
-    $list .= '<p class="pro_text pro_price"><input type="radio" name="pro_id" value="'.$rec['pro_id'].'"></p>';
-    $list .= '</div>';
 
-    $list .= '</form>';
+      $list .= '<p class="image"><img src="'.$img_dir.$rec['pro_image'].'"</></p>';
 
-    $list .= '</div>';
+      $list .= '<div class="pro_text_wrapper">';
+      $list .= '<p class="pro_text pro_name">' .$rec['pro_name'].'</p>';
+      $list .= '<p class="pro_text pro_price">' .$rec['pro_price'].'円</p>';
+      $list .= '<p class="pro_text pro_price"><input type="radio" name="pro_id" value="'.$rec['pro_id'].'"></p>';
+      $list .= '</div>';
+
+
+      $list .= '</div>';
+
+    }
 
   }
 
@@ -109,7 +112,7 @@ PHP Code END
       color: #0f2950;
       font-weight: bold;
       font-size: 20px;
-      padding-top:20px;
+      line-height: 68px;
       padding-left:20px;
       float: left;
 
@@ -169,7 +172,7 @@ PHP Code END
     .footer_text {
       color: #fff;
       line-height: 60px;
-      font-weight: bold;
+
     }
 
     .parents_submit {
@@ -180,7 +183,7 @@ PHP Code END
 
     .submit {
       width: 150px;
-      height: 50px;
+      height: 46px;
       background-color: #04a9f4;
       color :#0f2950;
       font-weight: bold;
@@ -192,7 +195,8 @@ PHP Code END
     .parents_pro_price_submit {
        float: right;
        margin-right: 40px;
-       margin-top: 12px;
+       /* margin-top: 12px;*/
+       line-height: 68px;
        color: #0f2950;
        font-weight: bold;
        font-size: 20px;
@@ -200,8 +204,10 @@ PHP Code END
 
     .pro_price_submit {
       width: 148px;
-      height: 44px;
+      height: 42px;
       border : 1px solid #ccc;
+      font-size: 24px;
+      text-align: right;
     }
 
 
@@ -209,6 +215,8 @@ PHP Code END
 
 </head>
 <body>
+  
+  <form action="result.php" method="post">
 
   <header>
   <div class= "header">
@@ -220,14 +228,16 @@ PHP Code END
       
 
       <div class="parents_submit">
-        
+
         <input type="submit" value="購入" class="submit">
 
       </div>
 
       <p class="parents_pro_price_submit">投入金額 <input type="text" name="pro_price" class="pro_price_submit"></p>
 
+
     </div>
+
     </nav>
 
   </div>
@@ -236,20 +246,21 @@ PHP Code END
   <section>
   <div class="main_section">
 
-    <form action="result.php" method="post">
+    <!--<form action="result.php" method="post">-->
 
-    </form>
-
-    <div class="parents_contents_wrapper clearfix">
+      <div class="parents_contents_wrapper clearfix">
 
         <?php echo $list ?>
-        <?php echo $list ?>
-        <?php echo $list ?>
 
-    </div>
+      </div>
+
+
+    <!--</form>-->
 
   </div>
   </section>
+
+  </form>
 
   <footer>
   <div class="footer">
