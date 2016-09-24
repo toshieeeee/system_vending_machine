@@ -8,8 +8,6 @@ try{
   $error = array();
   $data = array();
 
-
-
   /***********************************
 
   DB Access INFO
@@ -32,7 +30,6 @@ try{
 
     if(isset($_POST['pro_add']) === TRUE){
 
-
       /***********************************
       ▼商品名のバリデーション [INSERT]
       ************************************/
@@ -53,7 +50,7 @@ try{
 
       } else {
 
-        $pro_name = $_POST['pro_name'];    
+        $pro_name = htmlspecialchars($_POST['pro_name']);   
 
       }
 
@@ -75,15 +72,13 @@ try{
 
         $error['pro_price'] = '価格は半角、または全角スペースだけでは登録できません';
 
-      } else if (!preg_match('/^[1-9]+$/',$_POST['pro_price'])){
+      } else if (!preg_match('/^[0-9]+$/',$_POST['pro_price'])){
 
         $error['pro_price'] = '価格は正数値のみ入力可能です';
 
-        //整数のみバリデーションさせる。(is_numeric関数で判断 → 型を見たらどうしても、文字列に変換されてしまうみたいなので、だめ？)
-
       } else {
 
-        $pro_price = $_POST['pro_price'];
+        $pro_price = htmlspecialchars($_POST['pro_price']);
 
       }
 
@@ -103,18 +98,15 @@ try{
 
       } else if(preg_match('/^\s*$|^　*$/',$_POST['pro_num'])){ 
 
-      //[must]数値のみバリデーションさせる
-
         $error['pro_num'] = '在庫数は半角、または全角スペースだけでは登録できません';
 
-
-      } else if(!preg_match('/^[1-9]+$/',$_POST['pro_num'])){
+      } else if(!preg_match('/^[0-9]+$/',$_POST['pro_num'])){
 
         $error['pro_num'] = '在庫数は半角正数値のみ入力可能です';
 
       } else {
 
-        $pro_num = $_POST['pro_num'];
+        $pro_num = htmlspecialchars($_POST['pro_num']);
 
       }
 
@@ -130,10 +122,6 @@ try{
 
         if ($extension === 'jpg' || $extension === 'jpeg' || $extension === 'JPG' || $extension === 'png') {  
 
-          // ユニークID生成し保存ファイルの名前を変更 
-          //<MEMO> 画像 : 名前を生成するかは、要件によるが、ランダムに生成するパターンが多い
-          //DB : 外部キーは、設定する必要あり 
-
           $pro_image = md5(uniqid(mt_rand(), true)) . '.' . $extension; 
         
             if (is_file($img_dir . $pro_image) !== TRUE) { 
@@ -144,7 +132,7 @@ try{
 
               } 
               
-            } else { // 生成したIDがかぶることは通常ないため、IDの再生成ではなく再アップロードを促すようにした 
+            } else {  
 
               $error[] = 'ファイルアップロードに失敗しました。再度お試しください。';
             }
@@ -231,18 +219,15 @@ try{
         $dbh->commit(); // コミット
         header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
 
-      } else {
+        } else {
 
-      $dbh->rollback(); //ロールバック
+        $dbh->rollback(); //ロールバック
 
-      }
-
-      
-
+        }
+    
       }
 
     } //  $_POST['pro_add']
-
 
 
     /***********************************
@@ -302,7 +287,7 @@ try{
 
         if($stmt->execute($data)){ // クエリ判定/実行
           
-          header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
+          $msg = "在庫数・変更しました!";
 
         } else {
 
@@ -339,8 +324,9 @@ try{
       
       if($stmt->execute($data)){
 
-        //echo "ステータス変更しました!";
-        header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
+        $msg = "ステータス・変更しました!";
+
+        //本来は、SESSION変数で、データを保持・参照する。今回は、リダイレクトなして、文字の出力のみを行う。
 
       } else {
 
@@ -352,10 +338,9 @@ try{
 
   } /********** [$_POST] *************/
 
-
   /***********************************
 
-  SELECT - 一覧情報取得 - テーブルを結合してクエリを実行する。
+  SELECT - 一覧情報取得
 
   ************************************/
 
@@ -381,12 +366,6 @@ while(true){
   if($rec === false){
     break;
   }
-
-  //if($rec['pro_update_date'] == date('Y-m-d H:i:s')){
-   // echo "変更しました";
- // }
-  
-
 
   if($rec['pro_status'] === '1'){
 
@@ -498,6 +477,12 @@ PHP Code END
 
   <?php } ?>
 
+  <? if(isset($msg)){ ?>
+
+    <?php echo  $msg ?>
+
+  <?php } ?>
+
 
   <form method="post" action="tool.php" enctype="multipart/form-data">
 
@@ -524,9 +509,7 @@ PHP Code END
 
     <div>
 
-      <!--<input type="button" onclick="history.back()" value="戻る">-->
-      <br>
-      <input type="submit" name="pro_add" value="OK">
+      <br><input type="submit" name="pro_add" value="OK">
 
     </div>
 
@@ -555,28 +538,6 @@ PHP Code END
     </tbody>
 
   </table>
-
-
-<!--
-[フロント側の実装は、後回しにしましょう]
-
-<script type="text/javascript" src="./js/jquery-2.1.0.min.js"></script>
-<script type="text/javascript">
- 
-if($('.pro_status').text() == 1){
-
-  console.log("1");
-
-}else{
-
-  console.log("0");
-
-};
-
-
-</script>
-
--->
 
 </body>
 

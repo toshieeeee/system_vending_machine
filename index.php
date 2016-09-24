@@ -88,8 +88,6 @@ try{
   exit();
 }
 
-
-
 /******************************************************
 PHP Code END 
 *******************************************************/
@@ -208,7 +206,6 @@ PHP Code END
     .parents_pro_price_submit {
        float: right;
        margin-right: 40px;
-       /* margin-top: 12px;*/
        line-height: 68px;
        color: #0f2950;
        font-weight: bold;
@@ -232,46 +229,39 @@ PHP Code END
   <form action="result.php" method="post">
 
   <header>
-  <div class= "header">
-    <nav>
-    <div class="nav clearfix">
 
-      <h1 class="title">自動販売機</h1>
+    <div class= "header">
 
-      
+      <nav>
+      <div class="nav clearfix">
 
-      <div class="parents_submit">
+        <h1 class="title">自動販売機</h1>
 
-        <input type="submit" value="購入" class="submit">
+        <div class="parents_submit">
+
+          <input type="submit" value="購入" class="submit">
+
+        </div>
+
+        <p class="parents_pro_price_submit">投入金額 <input type="text" name="pro_price_submit" class="pro_price_submit"></p>
 
       </div>
-
-      <p class="parents_pro_price_submit">投入金額 <input type="text" name="pro_price_submit" class="pro_price_submit"></p>
-
+      </nav>
 
     </div>
-
-    </nav>
-
-  </div>
-  </header>
+    </header>
   
-  <section>
-  <div class="main_section">
+    <section>
+    <div class="main_section">
 
-    <!--<form action="result.php" method="post">-->
+        <div class="parents_contents_wrapper clearfix">
 
-      <div class="parents_contents_wrapper clearfix">
+          <?php echo $list ?>
 
-        <?php echo $list ?>
+        </div>
 
-      </div>
-
-
-    <!--</form>-->
-
-  </div>
-  </section>
+    </div>
+    </section>
 
   </form>
 

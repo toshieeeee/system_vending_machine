@@ -8,7 +8,6 @@ try{
   $error = array();
   $data = array();
 
-
   /***********************************
 
   DB Access INFO
@@ -20,8 +19,6 @@ try{
   $password = 'root';
   $dbh = new PDO($dsn,$user,$password); //PDO Instance
   $dbh->query('SET NAMES utf8'); // Query run & Access DB
-
-
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 
@@ -46,12 +43,6 @@ try{
     } else if (!preg_match('/^[0-9]+$/',$_POST['pro_price_submit'])){
 
       $error['pro_price_submit'] = '投入金額は正数値のみ入力可能です';
-
-
-    //} else if ($_POST['pro_price'] < $_POST['pro_price_submit']){
-
-      //$error['pro_price_submit'] = '投入金額が足りません';
-
 
     } else {
 
@@ -80,8 +71,6 @@ try{
     ************************************/
 
     if(count($error) === 0){ 
-
-      //$sql = 'SELECT pro_name,pro_price,pro_image FROM pro_info_table WHERE pro_id = '.$pro_id; 
 
        $sql = 'SELECT pro_info_table.pro_id,pro_info_table.pro_image,pro_info_table.pro_name,pro_info_table.pro_price,pro_num_table.pro_num,pro_info_table.pro_status FROM pro_num_table JOIN pro_info_table on pro_info_table.pro_id = pro_num_table.pro_id WHERE pro_info_table.pro_id = '.$pro_id;
 
@@ -137,7 +126,9 @@ try{
           $list .= '<p>お釣りは'.$pro_price_result.'円です</p>'; //お釣り
 
 
-          // ここにUPDATEのクエリをかけばいいんじゃないかなぁ。。。
+          /***********************************
+          ▼UPDATEクエリ
+          ************************************/
 
           $pro_update_date = date('Y-m-d H:i:s');
           $pro_num_update = $pro_num - 1;
@@ -146,30 +137,24 @@ try{
 
           if($stmt->execute($data)){
 
-            //header('Location: http://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); // ブラウザをリダイレクト
-
           }else{
 
             $error['pro_num_update'] = 'SQL失敗:' .$sql;  
 
           }
 
-      }
+        }
 
 
       //Disconnect DB
 
       $dbh = null;
 
-    }
-
+      } //WHILE
 
     } // COUNT
 
-
   } //  $_POST
-
-  
 
 }catch(Exception $e){
 
@@ -187,7 +172,6 @@ try{
   <title>Document</title>
   <style type="text/css">
     
-
     img {
     width: 480px;
   }
